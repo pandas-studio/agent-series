@@ -9,6 +9,14 @@ Facts recorded while building this episode. This is source material for the blog
 - Packages (uv, Python 3.12): langgraph 1.2.20, langchain-core 1.7.6, langchain-openai 1.7.4, openai 3.46.0
   (`versions.txt`).
 
+## Commands run
+- `uv init --lib --name research-agent --python 3.12 .` (in s1-langgraph/)
+- `uv add langgraph langchain-openai` and `uv add --dev pytest`
+- `corpus/fetch.sh` (downloads the LangGraph/LangChain doc pages into corpus/)
+- `uv run pytest -q` (unit tests, offline) and `AGENT_LIVE=1 uv run pytest -q -m live` (calls the model server)
+- `uv run python -m research_agent.check` (one question, prints seconds and tokens); `AGENT_THINKING=1 uv run python -m research_agent.check`
+- `uv run python -m research_agent.hello_graph`
+
 ## How Claude Code was used
 - The series plan (4 series, 30 episodes) was made in plan mode first; this episode's code was written after that
   plan was approved, in auto mode.

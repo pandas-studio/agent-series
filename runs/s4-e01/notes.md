@@ -12,6 +12,13 @@ Facts recorded while building this episode. This is source material for the blog
   LangGraph agent in episode 4) decides when to call them.
 - Packages: fastmcp 4.1.6, mcp 2.3.0, pydantic 2.14.3 (`versions.txt`).
 
+## Commands run
+- `uv init --lib --name docs-mcp --python 3.12 .` (in s4-mcp/)
+- `uv add fastmcp` and `uv add --dev pytest pytest-asyncio`
+- `uv run pytest -q` (7 in-memory tests and 1 stdio subprocess test)
+- `uv run python -m docs_mcp.server` (runs the server over stdio; `DOCS_ROOT` picks another doc folder)
+- `uv run python ../runs/s4-e01/demo.py` (starts the server as a subprocess and queries the real corpus)
+
 ## How Claude Code was used
 - Claude Code looked up the FastMCP 4.1 docs (Context7, `/prefecthq/fastmcp/v4.1.3`) before writing code: `@mcp.tool`
   without parentheses, `Client(server)` for in-memory tests, `result.data` for the structured return value.
@@ -20,6 +27,7 @@ Facts recorded while building this episode. This is source material for the blog
 - First stdio demo: a refused path (`../../.gitignore`) made the server print a full Rich traceback to stderr,
   because `read_doc` raised `ValueError`. Changed to `fastmcp.exceptions.ToolError`: the client gets the same
   message ("unknown page: ../../.gitignore", `is_error` true) and the server logs one line.
+  The server did not stop in either case (checked 11-09): with `ToolError`, the next `search_docs` call in the same session returned langgraph/interrupts.mdx; a test tool raising `ValueError` also came back as a tool error and the next call answered. Only the stderr log differed (full traceback vs one line).
 - The FastMCP 4.1.6 startup banner was printed to stderr; turned off with `mcp.run(show_banner=False)`. Over stdio,
   stdout carries the protocol, so server code never prints to stdout.
 
