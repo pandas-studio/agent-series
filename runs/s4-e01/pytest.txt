@@ -1,0 +1,9 @@
+tests/test_server.py::test_lists_two_tools PASSED                        [ 12%]
+tests/test_server.py::test_tool_schema_comes_from_type_hints PASSED      [ 25%]
+tests/test_server.py::test_search_ranks_and_reads PASSED                 [ 37%]
+tests/test_server.py::test_read_in_parts PASSED                          [ 50%]
+tests/test_server.py::test_refuses_paths_outside_docs[../../etc/passwd] PASSED [ 62%]
+tests/test_server.py::test_refuses_paths_outside_docs[secret.txt] PASSED [ 75%]
+tests/test_server.py::test_refuses_paths_outside_docs[langgraph/missing.mdx] PASSED [ 87%]
+tests/test_server.py::test_over_stdio_subprocess PASSED                  [100%]
+============================== 8 passed in 1.76s ===============================
