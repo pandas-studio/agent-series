@@ -2,6 +2,11 @@
 
 Facts recorded while building this episode. This is source material for the blog pipeline, not post text.
 
+## Key finding
+An expected tool failure must be raised as `ToolError`: a `ValueError` from `read_doc` made the server print a full
+Rich traceback to stderr, while `ToolError` gave the client the same message and the server one log line. In both
+cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.009–0.039 s per query.
+
 ## What was built
 - `s4-mcp/src/docs_mcp/server.py`: a FastMCP server named `docs` with two tools over the local doc folder
   (`corpus/`, 16 LangGraph/LangChain pages from langchain-ai/docs, MIT, commit 6c521ae614ef, about 400 KB):

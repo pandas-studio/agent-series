@@ -2,12 +2,18 @@
 
 Facts recorded while building this episode. This is source material for the blog pipeline, not post text.
 
+## Key finding
+With thinking on, the same one-sentence question took 7.91–8.81 s and 580–645 output tokens; with thinking off,
+0.65–0.90 s and 43–62 tokens. The answer is the same length, so roughly 10× the time and tokens go into thinking
+before it, while generation speed barely changes (66–73 tok/s). That is why thinking is off by default here.
+
 ## Setup
 - Machine: NVIDIA DGX Spark (GB10, 128 GB unified memory), Ubuntu 24.04.
 - Model server: vLLM 0.21.0 serving `nvidia/Qwen3.6-35B-A3B-NVFP4` on http://localhost:8000/v1 (OpenAI-compatible,
   no API key, max_model_len 262144).
-- Packages (uv, Python 3.12): langgraph 1.2.20, langchain-core 1.7.6, langchain-openai 1.7.4, openai 3.46.0
-  (`versions.txt`).
+- Packages added directly (uv, Python 3.12): `langgraph` and `langchain-openai` (dev: `pytest`). `langchain-core`
+  and `openai` were not added by hand; uv installed them as dependencies of those two.
+- Installed versions (`versions.txt`): langgraph 1.2.20, langchain-core 1.7.6, langchain-openai 1.7.4, openai 3.46.0.
 
 ## Commands run
 - `uv init --lib --name research-agent --python 3.12 .` (in s1-langgraph/)

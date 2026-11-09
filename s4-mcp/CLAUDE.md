@@ -19,3 +19,8 @@ A FastMCP server that lets an agent search and read the local doc pages in `../c
   `../runs/s4-eNN/`.
 - Check APIs against the current FastMCP docs (gofastmcp.com) and note differences from the author's book in
   `../runs/s4-eNN/notes.md`. Code and comments in English.
+
+## Episode notes (`../runs/s4-eNN/notes.md`)
+- Start with `## Key finding`: 2-3 sentences on the one result the post opens with, including its number.
+- List the packages added directly (`uv add …`) apart from the installed dependency versions.
+- Then: Commands run, How Claude Code was used, Design decisions, Measurements, Difference from the author's book, Tests.

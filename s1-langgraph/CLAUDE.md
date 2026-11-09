@@ -20,3 +20,8 @@ Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
   author's book, note the difference in `../runs/s1-eNN/notes.md`.
 - Code and comments in English. Model prompts in English; user-facing sample questions may be Korean.
 - Never commit secrets or the downloaded corpus pages.
+
+## Episode notes (`../runs/s1-eNN/notes.md`)
+- Start with `## Key finding`: 2-3 sentences on the one result the post opens with, including its number.
+- List the packages added directly (`uv add …`) apart from the installed dependency versions.
+- Then: Commands run, How Claude Code was used, Design decisions, Measurements, Difference from the author's book, Tests.
