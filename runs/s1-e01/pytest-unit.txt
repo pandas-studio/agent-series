@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.2.0, pluggy-1.7.0 -- ~/agent-series/s1-langgraph/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: ~/agent-series/s1-langgraph
+configfile: pyproject.toml
+plugins: anyio-4.16.0, langsmith-0.14.17
+collecting ... collected 8 items
+
+tests/test_hello_graph.py::test_one_node_graph_appends_model_reply PASSED [ 12%]
+tests/test_hello_graph.py::test_graph_shape PASSED                       [ 25%]
+tests/test_hello_graph.py::test_live_graph_runs_on_local_model SKIPPED   [ 37%]
+tests/test_model.py::test_defaults_point_at_local_server PASSED          [ 50%]
+tests/test_model.py::test_env_overrides PASSED                           [ 62%]
+tests/test_model.py::test_model_sends_thinking_switch PASSED             [ 75%]
+tests/test_model.py::test_live_check_answers_in_korean SKIPPED (set ...) [ 87%]
+tests/test_model.py::test_live_thinking_off_is_short SKIPPED (set AG...) [100%]
+
+========================= 5 passed, 3 skipped in 0.30s =========================

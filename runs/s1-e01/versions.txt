@@ -1,0 +1,5 @@
+langchain-core       1.7.6
+langchain-openai     1.7.4
+langgraph            1.2.20
+openai               3.46.0
+{"version":"0.21.0+2325b6f0.dev"}
