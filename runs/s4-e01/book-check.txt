@@ -1,0 +1,8 @@
+fastmcp 4.1.6
+transports: ('stdio', 'http', 'sse', 'streamable-http')
+book-style tools: ['greet', 'plain'] calls: hi a 3
+greet as the client sees it: {"name": "greet", "title": "Greet", "description": "Greets the user.", "input_schema": {"type": "object", "additionalProperties": false, "properties": {"name": {"type": "string", "description": "the name to greet"}}, "required": ["name"]}, "output_schema": {"properties": {"result": {"type": "string"}}, "required": ["result"], "type": "object", "x-fastmcp-wrap-result": true}, "meta": {"fastmcp": {"tags": []}}}
+search_docs description: 'Find documentation pages about a topic.\n\nReturns the best pages first, each with its path, title, number of matched words and one matching line.\nUse read_doc with a returned path to read the page.'
+search_docs parameter descriptions: {'query': None, 'limit': None}
+read_doc description: 'Read part of a documentation page.\n\npath comes from search_docs. Pages can be long: read max_chars characters from start, and continue with\nstart=next_start while more is true.'
+read_doc parameter descriptions: {'path': None, 'start': None, 'max_chars': None}

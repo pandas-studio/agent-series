@@ -15,7 +15,9 @@ cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.
     (interrupts.mdx is 61,731 characters).
 - No model is involved in this episode. The server only exposes tools; a client (Claude Code in episode 3, a
   LangGraph agent in episode 4) decides when to call them.
-- Packages: fastmcp 4.1.6, mcp 2.3.0, pydantic 2.14.3 (`versions.txt`).
+- Packages added directly: `fastmcp` (dev: `pytest`, `pytest-asyncio`). `mcp` and `pydantic` were not added by hand;
+  uv installed them as dependencies of fastmcp (through `fastmcp-slim`, `uv tree --invert`).
+- Installed versions (`versions.txt`): fastmcp 4.1.6, mcp 2.3.0, pydantic 2.14.3.
 
 ## Commands run
 - `uv init --lib --name docs-mcp --python 3.12 .` (in s4-mcp/)
@@ -23,6 +25,7 @@ cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.
 - `uv run pytest -q` (7 in-memory tests and 1 stdio subprocess test)
 - `uv run python -m docs_mcp.server` (runs the server over stdio; `DOCS_ROOT` picks another doc folder)
 - `uv run python ../runs/s4-e01/demo.py` (starts the server as a subprocess and queries the real corpus)
+- `uv run python ../runs/s4-e01/book_check.py` (book chapter 18 patterns on the installed fastmcp)
 
 ## How Claude Code was used
 - Claude Code looked up the FastMCP 4.1 docs (Context7, `/prefecthq/fastmcp/v4.1.3`) before writing code: `@mcp.tool`
@@ -52,9 +55,31 @@ cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.
   langgraph/checkpointers.mdx (159); "stream subgraphs" → langgraph/streaming.mdx (415).
 
 ## Difference from the author's book
-- Claude Code book chapter 18 (pages 332439–332442) builds a FastMCP server. This episode uses fastmcp 4.1.6 on
-  MCP SDK v2, where client-side tool fields are snake_case (`input_schema`).
-- Not yet compared line by line with the book's code; do that before writing the post.
+Claude Code book chapter 18 builds a GitHub API server with FastMCP: 18-1 (page 332439) the basic structure, 18-2
+(page 332440) the tools and tests. Compared on 11-09 against the installed fastmcp 4.1.6 (`book_check.py`,
+output `book-check.txt`).
+- Version: the book pins `fastmcp>=2.0.0`; this episode uses fastmcp 4.1.6 on MCP SDK v2, where client-side tool
+  fields are snake_case (`input_schema`).
+- Registration: the book writes `@mcp.tool()` and, for functions from another module, `mcp.tool()(func)`. This
+  episode writes `@mcp.tool` without parentheses (FastMCP 4.1 docs). Both book forms still register and answer on
+  4.1.6.
+- Docstrings (page 332439 says to always include Args and Returns): on 4.1.6 the `Args:` lines become each
+  parameter's `description` in the input schema, and the tool description keeps only the summary line. The
+  `Returns:` text does not reach the client at all: it is in neither the description nor the output schema.
+  This episode's docstrings are plain prose without sections, so the whole text (including what the tool returns
+  and which tool to call next) is the description, and the parameters have no description of their own.
+- Transports: the book lists `stdio` and `sse`. fastmcp 4.1.6 accepts `stdio`, `http`, `sse` and `streamable-http`.
+  This episode uses stdio only.
+- Testing: the book checks the tools in MCP Inspector (`npx @modelcontextprotocol/inspector`) and unit-tests the
+  functions directly with httpx mocked. This episode used no Inspector: the tests call the tools through
+  `fastmcp.Client(server.mcp)` in memory, so the schema and the error path are part of the test, plus one stdio
+  subprocess test.
+- Errors: both raise `ToolError` for an expected tool failure (the book for a 404 from GitHub, this episode for a
+  refused path). The book's `server.py` raises `ValueError` at startup when the GitHub token variable is missing;
+  that happens before any tool call. This episode reads local files and needs no token.
+- Layout: the book keeps the tools in `tools/github_tools.py` as async httpx functions and adds `main()` for uvx;
+  this episode keeps both tools in `src/docs_mcp/server.py` as plain functions and runs with
+  `python -m docs_mcp.server`.
 
 ## Tests
 - 8 passed (`pytest.txt`).
