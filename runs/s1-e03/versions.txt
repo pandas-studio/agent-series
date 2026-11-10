@@ -1,0 +1,8 @@
+langchain 1.4.9
+langchain-core 1.7.6
+langchain-openai 1.7.4
+langgraph 1.2.20
+langgraph-prebuilt 1.1.1
+openai 3.46.0
+pydantic 2.14.3
+vllm 0.21.0+2325b6f0.dev (--enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3)

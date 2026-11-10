@@ -1,0 +1,7 @@
+input after ['HumanMessage', 'AIMessage', 'ToolMessage', 'AIMessage', 'ToolMessage'] queries ['LangGraph resume interrupt Command', 'interrupt Command resume']
+attempt 1:    9.9 s, ~219 tokens (22 tok/s), finish tool_calls, tool args '{"query": "Command resume interrupt"}'
+attempt 2:  180.0 s, ~4134 tokens (23 tok/s), finish still generating at 180 s, tool args ''
+attempt 3:  180.0 s, ~4379 tokens (24 tok/s), finish still generating at 180 s, tool args ''
+attempt 4:  180.0 s, ~4376 tokens (24 tok/s), finish still generating at 180 s, tool args ''
+attempt 5:  180.0 s, ~4397 tokens (24 tok/s), finish still generating at 180 s, tool args ''
+attempt 6:  180.0 s, ~4408 tokens (24 tok/s), finish still generating at 180 s, tool args ''

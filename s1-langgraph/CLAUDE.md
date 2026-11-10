@@ -1,7 +1,8 @@
 # S1 research agent — rules for Claude Code
 
 ## What this is
-A LangGraph research agent that answers from the local doc pages in `../corpus/`.
+A LangGraph research agent that answers from the local doc pages in `../corpus/`: episode 2's routed graph
+(`graph.py`), and from episode 3 a tool-calling agent (`agent.py`, tool `search_docs` in `tools.py`).
 Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
 
 ## Environment
@@ -17,6 +18,13 @@ Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
 - Structured output on the local vLLM: `with_structured_output(..., method="json_schema")`. With
   `function_calling` (a forced tool choice) and `json_mode` the local Qwen returned nothing usable
   (`../runs/s1-e02/route-check.jsonl.txt`).
+- Tool calls on the local vLLM: only `tool_choice="auto"` returns a tool call; `"required"` and a named tool return
+  none (`../runs/s1-e03/force-tool-check.txt`). With auto, the model often answers from memory instead of searching,
+  even when the system prompt says to search first. A step that must use a tool is enforced by the graph
+  (`build_graph(guard=True)`: router + one reminder), not by the prompt.
+- Thinking on with tools can keep generating without stopping; give such calls a timeout and count the timeouts.
+- Doc pages pull their code in as MDX snippet components that `corpus/` lacks; `docs.page_text` strips the imports
+  and the `<Component />` lines before searching.
 - A change is done only when both the unit tests and the live tests pass. Save the live output under
   `../runs/s1-eNN/`.
 - Check APIs against the current official docs (docs.langchain.com), not memory. When the API differs from the

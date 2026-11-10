@@ -62,6 +62,18 @@ def test_search_uses_english_words_only(docs):
     assert search("한국어만 있는 질문", root=docs) == []
 
 
+def test_search_skips_mdx_snippet_imports(docs):
+    # the doc pages import their code examples as components that corpus/ does not have (episode 3)
+    (docs / "langgraph" / "interrupts.mdx").write_text(
+        "---\ntitle: Interrupts\n---\nimport InterruptsResumePy from '/snippets/code-samples/interrupts-resume-py.mdx';\n"
+        "\nResume a paused graph with a Command.\n\n<InterruptsResumePy />\n\nMore text.\n")
+    hit = search("resume command", root=docs)[0]
+    assert hit["path"] == "langgraph/interrupts.mdx"
+    assert "/snippets/" not in hit["excerpt"] and "<InterruptsResumePy" not in hit["excerpt"]
+    assert "Resume a paused graph" in hit["excerpt"]
+    assert search("InterruptsResumePy", root=docs) == []   # component names no longer count as words on the page
+
+
 def test_search_ignores_words_on_every_page(docs):
     # "graph" is on both pages, so only "checkpointer" decides; plain counts would favour the page that repeats "graph"
     (docs / "langgraph" / "streaming.mdx").write_text("# Streaming\n" + "graph " * 50)

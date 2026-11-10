@@ -12,6 +12,17 @@ DEFAULT_ROOT = Path(__file__).resolve().parents[3] / "corpus"
 SUFFIXES = {".md", ".mdx"}
 # ASCII only: with \w, a Korean particle stuck to the term ("checkpointer는") became part of the word and nothing matched.
 WORD = re.compile(r"[A-Za-z][A-Za-z0-9_-]+")
+# The pages pull their code examples in as MDX components (`import X from '/snippets/…'` and `<X />`), which corpus/
+# does not have. Episode 3: excerpts of interrupts.mdx started with 11 such import lines, and the model went on
+# searching for the component names as if they were code.
+MDX_IMPORT = re.compile(r"^import \w+ from ['\"]/snippets/[^'\"]+['\"];?[ \t]*\n", re.M)
+MDX_COMPONENT = re.compile(r"^[ \t]*<[A-Z]\w*[^>\n]*/>[ \t]*\n", re.M)
+
+
+def page_text(path: Path) -> str:
+    """A page without the MDX snippet imports and the self-closing components that stand for missing code."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    return MDX_COMPONENT.sub("", MDX_IMPORT.sub("", text))
 
 
 def docs_root(root: str | Path | None = None) -> Path:
@@ -33,8 +44,7 @@ def search(query: str, root: str | Path | None = None, limit: int = 3, chars: in
     if not words:
         return []
     base = docs_root(root)
-    pages = [(p, p.read_text(encoding="utf-8", errors="replace"))
-             for p in sorted(p for p in base.rglob("*") if p.suffix in SUFFIXES and p.is_file())]
+    pages = [(p, page_text(p)) for p in sorted(p for p in base.rglob("*") if p.suffix in SUFFIXES and p.is_file())]
     # A word on every page tells pages apart by nothing: "langgraph" is on all 16 pages, 229 times in
     # graph-api-control-flow.mdx, and plain counts ranked that page above checkpointers.mdx for a checkpointer question.
     df = {w: sum(w in text.lower() for _, text in pages) for w in words}

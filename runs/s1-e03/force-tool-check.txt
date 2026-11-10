@@ -1,0 +1,12 @@
+auto          4.89 s  out 96  finish stop  tool_calls []  content 'LangGraph에서 Checkpointer는 그래프의 **상태(State)**와 **이력'  | LangGraph에서 checkpointer는 무엇을 
+auto          1.44 s  out 27  finish tool_calls  tool_calls [{'query': 'interrupt resume Command'}]  content ''  | interrupt로 멈춘 그래프를 Command(res
+auto          5.02 s  out 97  finish stop  tool_calls []  content 'LangGraph 문서에 따르면, `StateGraph`에 조건부 엣지를 추가하려면 `ad'  | StateGraph에서 조건부 엣지는 어떻게 추가하나요
+auto          6.59 s  out 132  finish stop  tool_calls []  content 'LangChain의 `create_agent` 함수(또는 최신 버전의 `create_too'  | LangChain create_agent에 도구를 넘기
+required      1.64 s  out 23  finish tool_calls  tool_calls []  content ''  | LangGraph에서 checkpointer는 무엇을 
+required      1.37 s  out 23  finish tool_calls  tool_calls []  content ''  | interrupt로 멈춘 그래프를 Command(res
+required      1.66 s  out 26  finish tool_calls  tool_calls []  content ''  | StateGraph에서 조건부 엣지는 어떻게 추가하나요
+required      1.51 s  out 23  finish tool_calls  tool_calls []  content ''  | LangChain create_agent에 도구를 넘기
+search_docs   1.05 s  out 17  finish stop  tool_calls []  content ''  | LangGraph에서 checkpointer는 무엇을 
+search_docs   1.15 s  out 16  finish stop  tool_calls []  content ''  | interrupt로 멈춘 그래프를 Command(res
+search_docs   1.11 s  out 15  finish stop  tool_calls []  content ''  | StateGraph에서 조건부 엣지는 어떻게 추가하나요
+search_docs   1.19 s  out 17  finish stop  tool_calls []  content ''  | LangChain create_agent에 도구를 넘기
