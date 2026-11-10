@@ -1,0 +1,6 @@
+thinking False | choice auto | finish tool_calls | out_tokens 61 | tool_calls [('Route', '{"route": "docs", "reason": "The question asks about how to add condit')] | content '' | reasoning chars 0
+thinking False | choice required | finish tool_calls | out_tokens 43 | tool_calls [] | content '' | reasoning chars 0
+thinking False | choice named | finish stop | out_tokens 40 | tool_calls [] | content '' | reasoning chars 0
+thinking True | choice auto | finish tool_calls | out_tokens 164 | tool_calls [('Route', '{"route": "docs", "reason": "The question asks about StateGraph, which')] | content '' | reasoning chars 509
+thinking True | choice required | finish length | out_tokens 600 | tool_calls [] | content '' | reasoning chars 1518
+thinking True | choice named | finish stop | out_tokens 254 | tool_calls [] | content '' | reasoning chars 908

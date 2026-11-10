@@ -14,6 +14,9 @@ Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
 ## Rules
 - Every model-facing function takes the model as a parameter, so unit tests can pass a fake
   (`GenericFakeChatModel`) and run offline.
+- Structured output on the local vLLM: `with_structured_output(..., method="json_schema")`. With
+  `function_calling` (a forced tool choice) and `json_mode` the local Qwen returned nothing usable
+  (`../runs/s1-e02/route-check.jsonl.txt`).
 - A change is done only when both the unit tests and the live tests pass. Save the live output under
   `../runs/s1-eNN/`.
 - Check APIs against the current official docs (docs.langchain.com), not memory. When the API differs from the
