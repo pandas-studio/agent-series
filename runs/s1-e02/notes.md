@@ -61,6 +61,9 @@ none of the generated tokens.
 - The route is a model decision made with structured output, not a keyword rule, because the next episodes route
   between tools and the model's reasons are visible in `Route.reason`.
 - The search stays plain Python in this episode; episode 3 turns it into a tool the model calls.
+- In langchain-openai 1.7.4 the default `method` of `ChatOpenAI.with_structured_output` is already `json_schema`
+  (checked with `inspect.signature` on 11-10). Leaving the default works on the local server; it breaks only when
+  `function_calling` or `json_mode` is chosen. `graph.py` still passes `method="json_schema"` so the choice is visible.
 - Unit tests replace the router with a `RunnableLambda` that returns a fixed `Route`, because `GenericFakeChatModel`
   has no structured output; the graph's edges, reducer and search are tested offline.
 
