@@ -58,16 +58,17 @@ cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.
 Claude Code book chapter 18 builds a GitHub API server with FastMCP: 18-1 (page 332439) the basic structure, 18-2
 (page 332440) the tools and tests. Compared on 11-09 against the installed fastmcp 4.1.6 (`book_check.py`,
 output `book-check.txt`).
-- Version: the book pins `fastmcp>=2.0.0`; this episode uses fastmcp 4.1.6 on MCP SDK v2, where client-side tool
-  fields are snake_case (`input_schema`).
+- Docstrings (the main difference): page 332439 says to always include Args and Returns in a tool's docstring, so
+  that Claude knows when and how to use the tool. On 4.1.6 the `Args:` lines become each parameter's
+  `description` in the input schema, and the tool description keeps only the summary line. The `Returns:` text
+  does not reach the client at all: it is in neither the description nor the output schema. This episode's
+  docstrings are plain prose without sections, so the whole text (including what the tool returns and which tool
+  to call next) is the description, and the parameters have no description of their own.
 - Registration: the book writes `@mcp.tool()` and, for functions from another module, `mcp.tool()(func)`. This
   episode writes `@mcp.tool` without parentheses (FastMCP 4.1 docs). Both book forms still register and answer on
   4.1.6.
-- Docstrings (page 332439 says to always include Args and Returns): on 4.1.6 the `Args:` lines become each
-  parameter's `description` in the input schema, and the tool description keeps only the summary line. The
-  `Returns:` text does not reach the client at all: it is in neither the description nor the output schema.
-  This episode's docstrings are plain prose without sections, so the whole text (including what the tool returns
-  and which tool to call next) is the description, and the parameters have no description of their own.
+- Version: the book pins `fastmcp>=2.0.0`; this episode uses fastmcp 4.1.6. (The `inputSchema` → `input_schema`
+  rename is an MCP SDK v2 change met in this episode's tests; the book pages do not mention tool schema fields.)
 - Transports: the book lists `stdio` and `sse`. fastmcp 4.1.6 accepts `stdio`, `http`, `sse` and `streamable-http`.
   This episode uses stdio only.
 - Testing: the book checks the tools in MCP Inspector (`npx @modelcontextprotocol/inspector`) and unit-tests the
