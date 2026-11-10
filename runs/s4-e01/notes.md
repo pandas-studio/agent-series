@@ -5,7 +5,7 @@ Facts recorded while building this episode. This is source material for the blog
 ## Key finding
 An expected tool failure must be raised as `ToolError`: a `ValueError` from `read_doc` made the server print a full
 Rich traceback to stderr, while `ToolError` gave the client the same message and the server one log line. In both
-cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.009–0.039 s per query.
+cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.009–0.038 s per query (`demo-output.txt`).
 
 ## What was built
 - `s4-mcp/src/docs_mcp/server.py`: a FastMCP server named `docs` with two tools over the local doc folder
@@ -50,7 +50,7 @@ cases the server kept answering. Over 16 doc pages, `search_docs` answered in 0.
 
 ## Measurements (`demo-output.txt`, real corpus, stdio subprocess)
 - Server start to ready (connect + initialize): 0.45 s and 0.48 s (2 runs).
-- search_docs: 0.009–0.039 s per query over 16 pages.
+- search_docs: 0.009–0.038 s per query over 16 pages (3 queries in `demo-output.txt`).
 - Top results: "interrupt resume" → langgraph/interrupts.mdx (score 483); "checkpointer thread_id" →
   langgraph/checkpointers.mdx (159); "stream subgraphs" → langgraph/streaming.mdx (415).
 
