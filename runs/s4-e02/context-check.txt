@@ -1,0 +1,20 @@
+[11/10/26 18:19:40] INFO     Starting MCP server 'docs' with    transport.py:241
+                             transport 'stdio'                                  
+tools: ['search_docs', 'read_doc']
+resources: ['docs://index'] templates: ['docs://page/{path*}']
+prompts: [('ask_docs', ['question']), ('summarize_page', ['path'])]
+
+chat request, question only: 19 tokens; with the 2 tool definitions: 465 (+446, sent on every model call of an agent)
+  search_docs: +316 tokens alone
+  read_doc: +331 tokens alone
+
+tool result search_docs (5 hits): 279 tokens, 0.076 s
+tool result read_doc (default max_chars=4000): 4153 chars, 990 tokens, 0.004 s
+resource docs://page/langgraph/interrupts.mdx: 61731 chars, 15217 tokens, 0.003 s
+resource docs://index (16 pages): 2130 chars, 709 tokens
+prompt summarize_page: messages [('user', 'resource'), ('user', 'text')], embedded page 61731 chars (same as the resource)
+prompt ask_docs: messages [('user', 'text')], 72 tokens
+
+template one://page/langgraph/interrupts.mdx -> MCPError: Resource not found: 'one://page/langgraph/interrupts.mdx'
+template one://page/interrupts.mdx          -> 'got interrupts.mdx'
+template many://page/langgraph/interrupts.mdx -> 'got langgraph/interrupts.mdx'

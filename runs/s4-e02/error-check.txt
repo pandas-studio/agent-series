@@ -1,0 +1,12 @@
+tool     ToolError     stderr_lines=  4 next_call_answered=True  client: is_error=True 'unknown page: x.mdx'
+tool     ResourceError stderr_lines=  4 next_call_answered=True  client: is_error=True 'unknown page: x.mdx'
+tool     PromptError   stderr_lines=  4 next_call_answered=True  client: is_error=True 'unknown page: x.mdx'
+tool     ValueError    stderr_lines= 52 next_call_answered=True  client: is_error=True "Error calling tool 't': unknown page: x.mdx"
+resource ToolError     stderr_lines= 29 next_call_answered=True  client: MCPError 'unknown page: x.mdx'
+resource ResourceError stderr_lines= 29 next_call_answered=True  client: MCPError 'unknown page: x.mdx'
+resource PromptError   stderr_lines= 29 next_call_answered=True  client: MCPError 'unknown page: x.mdx'
+resource ValueError    stderr_lines= 53 next_call_answered=True  client: MCPError "Error reading resource 'docs://page/x.mdx': unknown page: x.mdx"
+prompt   ToolError     stderr_lines= 29 next_call_answered=True  client: MCPError 'unknown page: x.mdx'
+prompt   ResourceError stderr_lines= 29 next_call_answered=True  client: MCPError 'unknown page: x.mdx'
+prompt   PromptError   stderr_lines= 29 next_call_answered=True  client: MCPError 'unknown page: x.mdx'
+prompt   ValueError    stderr_lines= 96 next_call_answered=True  client: MCPError "Error rendering prompt 'p': unknown page: x.mdx"

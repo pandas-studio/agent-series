@@ -1,0 +1,4 @@
+fastmcp 4.1.6
+mcp 2.3.0
+pydantic 2.14.3
+vllm 0.21.0 (token counts: /tokenize, model nvidia/Qwen3.6-35B-A3B-NVFP4)

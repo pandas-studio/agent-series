@@ -2,7 +2,8 @@
 
 ## What this is
 A FastMCP server that lets an agent search and read the local doc pages in `../corpus/`
-(`corpus/fetch.sh` downloads them). Episode states are tagged `s4-eNN`.
+(`corpus/fetch.sh` downloads them): tools `search_docs`/`read_doc`, resources `docs://index` and
+`docs://page/{path*}`, prompts `ask_docs` and `summarize_page`. Episode states are tagged `s4-eNN`.
 
 ## Environment
 - Python 3.12 with uv. `uv run pytest -q` runs every test, including one that starts the server as a stdio
@@ -13,7 +14,12 @@ A FastMCP server that lets an agent search and read the local doc pages in `../c
 ## Rules
 - A tool's docstring and type hints are its contract for the model: keep them short, say what the tool returns,
   and say which tool to call next.
-- Tools never read outside `DOCS_ROOT`. Expected failures raise `ToolError` (message to the client, no traceback).
+- Tools, resources and prompts never read outside `DOCS_ROOT`. Expected failures raise the primitive's error class:
+  `ToolError`, `ResourceError`, `PromptError`. The client gets the message; for resources and prompts FastMCP 4.1.6
+  still logs a traceback (expected, not a crash).
+- Resource templates that take a page path use `{path*}`: a plain `{path}` matches one URI segment only.
+- A prompt returns `str` or `list[Message]`. Plain dicts are refused; an embedded page is
+  `Message(EmbeddedResource(...))`, because `Message(dict)` turns the dict into JSON text.
 - Over stdio, stdout belongs to the protocol: never print to stdout in server code.
 - Test through `fastmcp.Client` (in-memory) and keep one stdio subprocess test. Save demo output under
   `../runs/s4-eNN/`.
