@@ -87,6 +87,12 @@ times, at about one more model call (mean 2.06 calls, 5.25 s vs 2.65 s per quest
 - One reminder only: if the model still answers without searching, the answer is kept (no loop).
 - The reminder is a HumanMessage, not a second system prompt, so the transcript shows when the graph intervened.
 - The live tests do not use thinking on: a non-stopping call would make the test run for minutes.
+- The model-call cap (`MAX_MODEL_CALLS`) and the thinking runaway are separate problems. The cap counts model calls in
+  one run and stops a run that keeps calling tools (4 calls, then `final`); it cannot stop one call that keeps
+  generating, because that call never returns. Only a request timeout ends such a call. This episode has no fix for
+  the runaway; the agent runs with thinking off.
+- The records show what the model did, not why: it answered docs questions without searching (22 of 24 times). No
+  log or measurement says why it skipped the search.
 - `create_agent` is kept as the comparison. With the same model, tool and prompt it behaved like the hand-written
   graph (2 of 24 vs 2 of 24 searches). The guard needs the graph's own nodes; this episode did not try
   `create_agent` middleware.
