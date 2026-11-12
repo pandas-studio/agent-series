@@ -20,3 +20,5 @@ AGENT_LIVE=1 uv run pytest -q -m live   # 로컬 모델 서버가 필요합니�
 ```
 
 모델 서버 주소와 모델 이름은 `AGENT_BASE_URL`, `AGENT_MODEL` 환경 변수로 바꿉니다. OpenAI 호환 서버라면 어느 것이든 됩니다.
+
+`.mcp.json`은 S4 문서 서버(`s4-mcp/`)를 Claude Code에 프로젝트 범위로 연결합니다. 저장소 루트에서 `claude`를 실행하면 처음 한 번 승인 창이 뜹니다.

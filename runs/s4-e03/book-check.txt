@@ -1,0 +1,19 @@
+Book 18-4 (page 332442) registers the server in .claude/settings.json under "mcpServers" with "cwd".
+Checked 11-12 on Claude Code 2.1.322 in an empty git project (scratch folder, never trusted):
+
+1. .claude/settings.json with {"mcpServers": {"docs-book": {"type": "stdio", "command": "uv",
+   "args": ["run", "python", "-m", "docs_mcp.server"], "cwd": "~/agent-series/s4-mcp"}}}
+   $ claude mcp list            -> no docs-book line
+   $ claude mcp get docs-book   -> No MCP server named "docs-book".
+   claude -p ... (init event)   -> docs-book not among the session's MCP servers, no mcp__docs-book tools
+
+2. The same entry moved to .mcp.json, passed with --mcp-config .mcp.json --strict-mcp-config
+   init: [{'name': 'docs-book', 'status': 'failed', 'source': 'dynamic'}]
+   without the "cwd" key: also 'failed'
+
+3. args ["run", "--directory", "~/agent-series/s4-mcp", "python", "-m", "docs_mcp.server"], no "cwd"
+   init: [{'name': 'docs-book', 'status': 'connected', 'source': 'dynamic'}], tools mcp__docs-book__read_doc,
+   mcp__docs-book__search_docs
+
+So mcpServers in .claude/settings.json is not read, and "cwd" in .mcp.json does not set the server's working
+directory; `uv run --directory <project>` does. (Paths shown with ~; the files used the absolute home path.)

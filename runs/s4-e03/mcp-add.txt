@@ -1,0 +1,15 @@
+$ claude mcp add --scope project docs -- uv run --directory s4-mcp python -m docs_mcp.server
+Added stdio MCP server docs with command: uv run --directory s4-mcp python -m docs_mcp.server to project config
+
+$ claude mcp list   (docs line only; the other lines are this machine's own servers)
+docs: uv run --directory s4-mcp python -m docs_mcp.server - ⏸ Pending approval (run `claude` to approve)
+
+$ claude mcp get docs
+docs:
+  Scope: Project config (shared via .mcp.json)
+  Status: ⏸ Pending approval (run `claude` to approve)
+  Type: stdio
+  Command: uv
+  Args: run --directory s4-mcp python -m docs_mcp.server
+  Environment:
+

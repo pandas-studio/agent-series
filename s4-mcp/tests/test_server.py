@@ -122,3 +122,13 @@ async def test_over_stdio_subprocess(docs):
         page = (await c.read_resource("docs://page/langgraph/streaming.mdx"))[0].text
     assert hits[0]["path"] == "langgraph/streaming.mdx"
     assert page.startswith("# Streaming")
+
+
+async def test_project_mcp_json_starts_the_server():
+    # The repository's .mcp.json, started the way Claude Code starts a project-scope server: from the repository root.
+    repo = PROJECT.parent
+    entry = json.loads((repo / ".mcp.json").read_text())["mcpServers"]["docs"]
+    assert entry["type"] == "stdio" and "cwd" not in entry   # Claude Code ignores "cwd"; --directory picks the project
+    transport = StdioTransport(command=entry["command"], args=entry["args"], cwd=str(repo))
+    async with Client(transport) as c:
+        assert {t.name for t in await c.list_tools()} == {"search_docs", "read_doc"}

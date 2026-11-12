@@ -1,0 +1,4 @@
+fastmcp 4.1.6
+mcp 2.3.0
+pydantic 2.14.3
+claude-code 2.1.322 (model in the runs: claude-sonnet-5-5)

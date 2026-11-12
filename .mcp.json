@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "docs": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "s4-mcp",
+        "python",
+        "-m",
+        "docs_mcp.server"
+      ],
+      "env": {}
+    }
+  }
+}

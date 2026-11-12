@@ -21,6 +21,11 @@ A FastMCP server that lets an agent search and read the local doc pages in `../c
 - A prompt returns `str` or `list[Message]`. Plain dicts are refused; an embedded page is
   `Message(EmbeddedResource(...))`, because `Message(dict)` turns the dict into JSON text.
 - Over stdio, stdout belongs to the protocol: never print to stdout in server code.
+- Claude Code connects through the repository's `.mcp.json` (`claude mcp add --scope project docs -- uv run --directory
+  s4-mcp python -m docs_mcp.server`, run from the repository root). Claude Code ignores `cwd` in `.mcp.json` and does not
+  read `mcpServers` from `.claude/settings.json`; `uv run --directory` picks the project.
+- `claude -p` loads `.mcp.json` servers without the approval prompt, but each tool call still needs permission: pass
+  `--allowedTools "mcp__docs__search_docs mcp__docs__read_doc"` (or the user's permission mode decides).
 - Test through `fastmcp.Client` (in-memory) and keep one stdio subprocess test. Save demo output under
   `../runs/s4-eNN/`.
 - Check APIs against the current FastMCP docs (gofastmcp.com) and note differences from the author's book in
