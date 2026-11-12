@@ -25,6 +25,11 @@ Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
 - Thinking on with tools can keep generating without stopping; give such calls a timeout and count the timeouts.
 - Doc pages pull their code in as MDX snippet components that `corpus/` lacks; `docs.page_text` strips the imports
   and the `<Component />` lines before searching.
+- With a checkpointer the thread keeps every turn. Anything that belongs to one turn (model calls, the reminder,
+  "searched yet", the question to route) is computed from the messages since the last user question
+  (`agent.this_turn`), never kept in a state field that the next turn would inherit.
+- SQLite checkpoints: `SqliteSaver.from_conn_string(path)` (`chat.open_saver`). `SqliteSaver(sqlite3.connect(path))`
+  fails on the first invoke because LangGraph writes checkpoints from a worker thread.
 - A change is done only when both the unit tests and the live tests pass. Save the live output under
   `../runs/s1-eNN/`.
 - Check APIs against the current official docs (docs.langchain.com), not memory. When the API differs from the

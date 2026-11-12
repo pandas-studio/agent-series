@@ -49,44 +49,57 @@ MAX_MODEL_CALLS = 4
 
 
 class AgentState(MessagesState):
-    model_calls: int
     route: str
-    reminded: bool
 
 
-def build_graph(model=None, tools=None, guard: bool = False, router=None):
+def this_turn(messages: list) -> tuple[str, list]:
+    """(question, messages since it) for the current turn: the last user message that is not the graph's own reminder
+    or final prompt. With a checkpointer the thread keeps every earlier turn, so per-turn facts (model calls, the
+    reminder, whether this turn searched) are counted here instead of being kept in state fields: episode 4 found that
+    fields like model_calls and reminded carried over to the next turn (../runs/s1-e04/memory-check-before-r*.jsonl.txt)."""
+    for i in range(len(messages) - 1, -1, -1):
+        m = messages[i]
+        if isinstance(m, HumanMessage) and m.content not in (REMINDER, FINAL):
+            return m.content, messages[i:]
+    return "", messages
+
+
+def build_graph(model=None, tools=None, guard: bool = False, router=None, checkpointer=None):
     tools = tools or [search_docs]
     base = model or make_model()
     llm = base.bind_tools(tools)
 
     def classify(state: AgentState) -> dict:
         from .graph import CLASSIFY_PROMPT, make_router   # episode 2's structured-output router
-        question = state["messages"][0].content
+        question, _ = this_turn(state["messages"])
         return {"route": (router or make_router(base)).invoke(CLASSIFY_PROMPT.format(question=question)).route}
 
     def agent(state: AgentState) -> dict:
-        reply = llm.invoke([SystemMessage(SYSTEM)] + state["messages"])
-        return {"messages": [reply], "model_calls": state.get("model_calls", 0) + 1}
+        return {"messages": [llm.invoke([SystemMessage(SYSTEM)] + state["messages"])]}
 
     def remind(state: AgentState) -> dict:
-        return {"messages": [HumanMessage(REMINDER)], "reminded": True}
+        return {"messages": [HumanMessage(REMINDER)]}
 
     def final(state: AgentState) -> dict:
         ask = HumanMessage(FINAL)   # kept in the history, so a run shows that it hit the cap
         reply = base.invoke([SystemMessage(SYSTEM)] + state["messages"] + [ask])
-        return {"messages": [ask, reply], "model_calls": state.get("model_calls", 0) + 1}
+        return {"messages": [ask, reply]}
+
+    def calls(turn: list) -> int:
+        return sum(isinstance(m, AIMessage) for m in turn)
 
     def after_agent(state: AgentState) -> Literal["tools", "remind", "__end__"]:
-        last = state["messages"][-1]
-        if getattr(last, "tool_calls", None):
+        _, turn = this_turn(state["messages"])
+        if getattr(turn[-1], "tool_calls", None):
             return "tools"
-        searched = any(isinstance(m, ToolMessage) for m in state["messages"])
-        if guard and state.get("route") == "docs" and not searched and not state.get("reminded"):
+        searched = any(isinstance(m, ToolMessage) for m in turn)
+        reminded = any(isinstance(m, HumanMessage) and m.content == REMINDER for m in turn)
+        if guard and state.get("route") == "docs" and not searched and not reminded:
             return "remind"
         return END
 
     def after_tools(state: AgentState) -> Literal["agent", "final"]:
-        return "final" if state.get("model_calls", 0) >= MAX_MODEL_CALLS else "agent"
+        return "final" if calls(this_turn(state["messages"])[1]) >= MAX_MODEL_CALLS else "agent"
 
     graph = StateGraph(AgentState)
     graph.add_node("agent", agent)
@@ -104,7 +117,7 @@ def build_graph(model=None, tools=None, guard: bool = False, router=None):
         graph.add_conditional_edges("agent", after_agent, ["tools", END])
     graph.add_conditional_edges("tools", after_tools, ["agent", "final"])
     graph.add_edge("final", END)
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
 def build_prebuilt(model=None, tools=None):

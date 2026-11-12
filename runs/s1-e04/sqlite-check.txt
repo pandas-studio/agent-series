@@ -1,0 +1,9 @@
+1a connect(path), invoke in the creating thread: ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id N and this is thread id N.
+1b same saver, invoke from another thread: ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id N and this is thread id N.
+2a check_same_thread=False, creating thread: 2
+2b check_same_thread=False, another thread: 4
+3  from_conn_string opens: sqlite3.connect( conn_string, # https://ricardoanderegg.com/posts/python-sqlite-thread-safety/ check_same_thread=False, ) )
+3  where 1a fails: /usr/lib/python3.12/concurrent/futures/thread.py:run -> langgraph/pregel/_loop.py:_checkpointer_put_after_previous -> langgraph/checkpoint/sqlite/__init__.py:put -> /usr/lib/python3.12/contextlib.py:__enter__ -> langgraph/checkpoint/sqlite/__init__.py:cursor
+4  process first: ['first process question', 'first answer']
+4  process second: ['first process question', 'first answer', 'second process question', 'second answer']
+4  tables {'checkpoints': 6, 'writes': 6}, file 28672 bytes

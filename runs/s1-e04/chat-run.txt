@@ -1,0 +1,16 @@
+$ uv run python -m research_agent.chat --thread demo "LangGraph에서 checkpointer는 무엇을 저장하나요?"
+{"thread": "demo", "seconds": 5.08, "messages_in_thread": 6, "queries": ["checkpointer stores what LangGraph"], "model_calls": 3, "input_tokens": 2336, "output_tokens": 278, "reminded": true, "capped": false, "answer": "LangGraph에서 Checkpointer는 그래프의 **상태(State) 스냅샷**을 각 슈퍼스텝(super-step)마다 저장합니다. 이 저장소는 **스레드(Thread)** 단위로 조직화되어, 대화의 연속성 유지, 타임트래블 디버깅, 장애 허용(Fault-tolerant) 실행, 그리고 인간 개입(Human-in-the-loop) 워크플로우를 가능하"}
+$ uv run python -m research_agent.chat --thread demo "그걸 나중에 다시 꺼내려면 invoke 할 때 무엇을 넘겨야 하나요?"
+{"thread": "demo", "seconds": 4.3, "messages_in_thread": 10, "queries": ["resume execution checkpoint invoke config thread_id"], "model_calls": 2, "input_tokens": 3988, "output_tokens": 198, "reminded": false, "capped": false, "answer": "LangGraph에서 저장된 체크포인트 상태를 다시 꺼내어 실행을 이어가려면, `invoke` 메서드의 `config` 파라미터를 사용하여 **스레드 ID(Thread ID)**를 전달해야 합니다.\n\n구체적으로는 다음과 같은 형식의 구성(Configuration) 객체를 넘겨줍니다:\n\n```python\nconfig = {\"configurable\": {\"th"}
+$ uv run python -m research_agent.chat --thread demo --history
+{
+  "thread": "demo",
+  "questions": [
+    "LangGraph에서 checkpointer는 무엇을 저장하나요?",
+    "그걸 나중에 다시 꺼내려면 invoke 할 때 무엇을 넘겨야 하나요?"
+  ],
+  "messages": 10,
+  "checkpoints": 14
+}
+$ ls -l .state/chat.sqlite
+143360 bytes
