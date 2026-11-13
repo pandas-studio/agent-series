@@ -4,12 +4,14 @@ Facts recorded while building this episode. This is source material for the blog
 
 ## Key finding
 The current docs say each tool from `MCPAdapter.list_tools()` opens its own session per call, even after the
-adapter's `async with` has exited. Over stdio that did not mean a new server process per call: with FastMCP's default
-`keep_alive`, one docs-server process served discovery and all later calls (1 start for 6 calls; about 10 ms per
+adapter's `async with` has exited. Over stdio that did not mean a new server process per call: with the default
+`keep_alive=True` of FastMCP's client-side stdio transport (`fastmcp.client.transports.StdioTransport`, an option of
+the client that starts the server, not of the server), one docs-server process served discovery and all later calls (1 start for 6 calls; about 10 ms per
 call; 1 start for a whole pass of 24 agent runs). Only with `keep_alive=False` did each call start a new server: 7
 starts for 6 calls and about 540 ms per call (same numbers in 2 runs, `session-check-r*.jsonl.txt`). With the
-docs-only system prompt the local Qwen used the MCP tools in 24 of 24 runs; with episode s1-e03's prompt, copied
-verbatim, it searched in 6 of 24 (`agent-check-r*.jsonl.txt`).
+docs-only system prompt the local Qwen used the MCP tools in 24 of 24 runs; with the system prompt of the other
+series S1 (its episode 3, `s1-e03`; not this series' episode 3), copied verbatim, it searched in 6 of 24
+(`agent-check-r*.jsonl.txt`).
 
 ## What was built
 - `s4-mcp/src/docs_mcp/agent.py`: a LangChain `create_agent` agent (a LangGraph graph: model node + tool node) on the
@@ -21,6 +23,8 @@ verbatim, it searched in 6 of 24 (`agent-check-r*.jsonl.txt`).
     `list_tools()`, exits the `async with`, then calls `build_agent(tools)` and runs `agent.ainvoke(...)` (the default
     pattern in the LangChain connections page).
   - `build_agent(tools, model)`: one line, `create_agent(model, tools, system_prompt=SYSTEM)`; it does not touch MCP.
+  - A `warnings.filterwarnings` line in `agent.py` hides the one-time `LangChainBetaWarning` of `langchain.mcp`. It
+    is code, not a CLAUDE.md rule.
   - `make_model()`: `ChatOpenAI` on `http://localhost:8000/v1`, thinking off, `AGENT_*` environment variables (same
     settings as series S1).
   - `uv run python -m docs_mcp.agent "<question>"` prints the tool calls to stderr and the answer to stdout.
