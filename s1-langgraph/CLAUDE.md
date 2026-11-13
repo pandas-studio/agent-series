@@ -2,7 +2,8 @@
 
 ## What this is
 A LangGraph research agent that answers from the local doc pages in `../corpus/`: episode 2's routed graph
-(`graph.py`), and from episode 3 a tool-calling agent (`agent.py`, tool `search_docs` in `tools.py`).
+(`graph.py`), and from episode 3 a tool-calling agent (`agent.py`, tool `search_docs` in `tools.py`); episode 4 keeps
+threads in SQLite (`chat.py`), episode 5 pauses before each search for a person's review (`review=True`).
 Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
 
 ## Environment
@@ -30,6 +31,15 @@ Each blog episode adds one capability. The episode's state is tagged `s1-eNN`.
   (`agent.this_turn`), never kept in a state field that the next turn would inherit.
 - SQLite checkpoints: `SqliteSaver.from_conn_string(path)` (`chat.open_saver`). `SqliteSaver(sqlite3.connect(path))`
   fails on the first invoke because LangGraph writes checkpoints from a worker thread.
+- Human review (`build_graph(review=True)`): `interrupt()` lives in its own `review` node, never in a node that calls
+  the model or a tool before it. On resume LangGraph re-runs the interrupted node from its first line, so a pause
+  after a model call calls the model again and runs a call the reviewer never saw.
+- A rejected tool call must not reach `ToolNode`: answer each call id with a ToolMessage and route with
+  `Command(goto=...)` past the tools node. `ToolNode` runs the tool calls of the last AI message, so a plain edge to it
+  after a rejection still runs the rejected call (`../runs/s1-e05/book-check.jsonl.txt`).
+- Never wrap `interrupt()` in `try/except Exception`: it raises `GraphInterrupt`, which such a block swallows.
+- Resume values are validated with `interrupt(..., response_schema=ReviewDecision)`; an invalid value raises
+  `ValidationError` and the thread stays paused.
 - A change is done only when both the unit tests and the live tests pass. Save the live output under
   `../runs/s1-eNN/`.
 - Check APIs against the current official docs (docs.langchain.com), not memory. When the API differs from the

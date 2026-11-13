@@ -17,6 +17,14 @@ to enforce it.
                              ├(docs question, no search yet, no reminder yet)→ remind → agent
                              └(otherwise)→ END
 
+build_graph(review=True) (episode 5) pauses before every search with interrupt(): a person sees the pending
+search_docs calls and resumes with Command(resume={"action": "approve" | "edit" | "reject", ...}). The pause is a node
+of its own, after the agent node: on resume LangGraph re-runs the node that called interrupt() from its first line,
+so an interrupt inside the agent node would call the model again (../runs/s1-e05/review-check-*.jsonl.txt).
+
+    … agent ─(tool_calls)→ review ─(approve / edit)→ tools → agent …
+                                   └(reject)→ agent (a ToolMessage tells it the search was refused)
+
 Run: uv run python -m research_agent.agent "질문"            (StateGraph)
      uv run python -m research_agent.agent --guard "질문"    (StateGraph with router and reminder)
      uv run python -m research_agent.agent --prebuilt "질문" (create_agent)
@@ -30,6 +38,8 @@ from typing import Literal
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
+from langgraph.types import Command, interrupt
+from pydantic import BaseModel
 
 from .model import make_model
 from .tools import search_docs
@@ -52,6 +62,28 @@ class AgentState(MessagesState):
     route: str
 
 
+class ReviewDecision(BaseModel):
+    """What the reviewer sends back with Command(resume=...). LangGraph validates the resume value against it."""
+    action: Literal["approve", "edit", "reject"]
+    query: str | None = None    # edit: the search query to run instead of the model's
+    reason: str | None = None   # reject: passed to the model in the ToolMessage
+
+
+REJECTED = "The reviewer did not allow this search ({reason}). Answer without searching, and say that you did not search."
+
+
+def pending_calls(message: AIMessage) -> list[dict]:
+    """The interrupt payload: the tool calls waiting for review, JSON-serializable."""
+    return [{"name": c["name"], "args": c["args"], "id": c["id"]} for c in message.tool_calls]
+
+
+def with_query(message: AIMessage, query: str) -> AIMessage:
+    """The same AI message (same id, so the messages reducer replaces it) with every search query set to `query`."""
+    calls = [{**c, "args": {**c["args"], "query": query}} for c in message.tool_calls]
+    extra = {k: v for k, v in message.additional_kwargs.items() if k != "tool_calls"}
+    return message.model_copy(update={"tool_calls": calls, "additional_kwargs": extra})
+
+
 def this_turn(messages: list) -> tuple[str, list]:
     """(question, messages since it) for the current turn: the last user message that is not the graph's own reminder
     or final prompt. With a checkpointer the thread keeps every earlier turn, so per-turn facts (model calls, the
@@ -64,7 +96,7 @@ def this_turn(messages: list) -> tuple[str, list]:
     return "", messages
 
 
-def build_graph(model=None, tools=None, guard: bool = False, router=None, checkpointer=None):
+def build_graph(model=None, tools=None, guard: bool = False, router=None, checkpointer=None, review: bool = False):
     tools = tools or [search_docs]
     base = model or make_model()
     llm = base.bind_tools(tools)
@@ -88,10 +120,24 @@ def build_graph(model=None, tools=None, guard: bool = False, router=None, checkp
     def calls(turn: list) -> int:
         return sum(isinstance(m, AIMessage) for m in turn)
 
-    def after_agent(state: AgentState) -> Literal["tools", "remind", "__end__"]:
+    def review_node(state: AgentState) -> Command[Literal["tools", "agent", "final"]]:
+        # Nothing with a side effect before interrupt(): on resume this node runs again from here.
+        last = state["messages"][-1]
+        decision = interrupt({"question": "Run these searches?", "tool_calls": pending_calls(last)},
+                             response_schema=ReviewDecision)
+        if decision.action == "approve":
+            return Command(goto="tools")
+        if decision.action == "edit" and decision.query:
+            return Command(goto="tools", update={"messages": [with_query(last, decision.query)]})
+        refused = [ToolMessage(REJECTED.format(reason=decision.reason or "no reason given"), tool_call_id=c["id"],
+                               name=c["name"], status="error") for c in last.tool_calls]
+        after = "final" if calls(this_turn(state["messages"])[1]) >= MAX_MODEL_CALLS else "agent"
+        return Command(goto=after, update={"messages": refused})
+
+    def after_agent(state: AgentState) -> Literal["tools", "review", "remind", "__end__"]:
         _, turn = this_turn(state["messages"])
         if getattr(turn[-1], "tool_calls", None):
-            return "tools"
+            return "review" if review else "tools"
         searched = any(isinstance(m, ToolMessage) for m in turn)
         reminded = any(isinstance(m, HumanMessage) and m.content == REMINDER for m in turn)
         if guard and state.get("route") == "docs" and not searched and not reminded:
@@ -105,16 +151,19 @@ def build_graph(model=None, tools=None, guard: bool = False, router=None, checkp
     graph.add_node("agent", agent)
     graph.add_node("tools", ToolNode(tools))
     graph.add_node("final", final)
+    if review:
+        graph.add_node("review", review_node)
+    nexts = ["review" if review else "tools"]
     if guard:
         graph.add_node("classify", classify)
         graph.add_node("remind", remind)
         graph.add_edge(START, "classify")
         graph.add_edge("classify", "agent")
         graph.add_edge("remind", "agent")
-        graph.add_conditional_edges("agent", after_agent, ["tools", "remind", END])
+        graph.add_conditional_edges("agent", after_agent, nexts + ["remind", END])
     else:
         graph.add_edge(START, "agent")
-        graph.add_conditional_edges("agent", after_agent, ["tools", END])
+        graph.add_conditional_edges("agent", after_agent, nexts + [END])
     graph.add_conditional_edges("tools", after_tools, ["agent", "final"])
     graph.add_edge("final", END)
     return graph.compile(checkpointer=checkpointer)

@@ -1,0 +1,8 @@
+{"check": "versions", "langgraph": "1.2.20", "langchain_core": "1.7.6"}
+{"check": "261618 reject → plain edge to ToolNode", "tools_executed": ["delete_file(/tmp/important.txt)"], "tool_messages": ["사용자가 'delete_file' 실행을 거부했습니다.", "파일 삭제 완료: /tmp/important.txt"], "final": "끝"}
+{"check": "261618 mixed calls, sensitive rejected", "tools_executed": ["web_search(회의)", "delete_file(/tmp/important.txt)"], "tool_messages": ["사용자가 'delete_file' 실행을 거부했습니다.", "'회의'에 대한 검색 결과입니다.", "파일 삭제 완료: /tmp/important.txt"]}
+{"check": "261619 rule 1: interrupt inside try/except Exception", "paused": false, "last": "에러 발생 (GraphInterrupt)"}
+{"check": "261619 rule 4: code before interrupt on resume", "before": 2, "after": 1}
+{"check": "interrupt without a checkpointer", "ok": true, "keys": ["__interrupt__", "messages"]}
+{"check": "resume without a checkpointer", "config": null, "ok": false, "error": "RuntimeError: Cannot use Command(resume=...) without checkpointer"}
+{"check": "resume without a checkpointer", "config": {"configurable": {"thread_id": "nc"}}, "ok": false, "error": "RuntimeError: Cannot use Command(resume=...) without checkpointer"}
