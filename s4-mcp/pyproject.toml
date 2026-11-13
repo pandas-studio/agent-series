@@ -5,6 +5,8 @@ description = "Series S4: an MCP server over local doc pages, built with Claude 
 requires-python = ">=3.12"
 dependencies = [
     "fastmcp>=4.1.6",
+    "langchain-openai>=1.7.4",
+    "langchain[mcp]>=1.5.0",
 ]
 
 [build-system]

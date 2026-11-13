@@ -5,3 +5,5 @@ corpus/langgraph/
 corpus/langchain/
 .state/
 *.sqlite
+*.starts
+*.err

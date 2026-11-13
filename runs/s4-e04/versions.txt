@@ -1,0 +1,10 @@
+fastmcp 4.1.6
+langchain 1.5.0
+langchain-core 1.8.0
+langchain-openai 1.7.4
+langgraph 1.2.21
+mcp 2.3.0
+openai 3.50.0
+pydantic 2.14.3
+python 3.12.3
+model nvidia/Qwen3.6-35B-A3B-NVFP4 (vLLM, localhost:8000), thinking off, temperature 0.6
