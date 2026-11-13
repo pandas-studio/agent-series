@@ -17,8 +17,10 @@ verbatim, it searched in 6 of 24 (`agent-check-r*.jsonl.txt`).
   - `server_config(docs_root)`: an MCPConfig `{"mcpServers": {"docs": {"command": sys.executable, "args": ["-m",
     "docs_mcp.server"]}}}`, plus `"env": {"DOCS_ROOT": …}` when a folder is given. No `transport` key: FastMCP infers
     stdio from `command`.
-  - `ask(question)`: opens `MCPAdapter(server_config())`, calls `list_tools()`, exits the `async with`, then builds
-    the agent and runs `agent.ainvoke(...)` (the default pattern in the LangChain connections page).
+  - `ask(question)`: the only function that opens the adapter. It opens `MCPAdapter(server_config())`, calls
+    `list_tools()`, exits the `async with`, then calls `build_agent(tools)` and runs `agent.ainvoke(...)` (the default
+    pattern in the LangChain connections page).
+  - `build_agent(tools, model)`: one line, `create_agent(model, tools, system_prompt=SYSTEM)`; it does not touch MCP.
   - `make_model()`: `ChatOpenAI` on `http://localhost:8000/v1`, thinking off, `AGENT_*` environment variables (same
     settings as series S1).
   - `uv run python -m docs_mcp.agent "<question>"` prints the tool calls to stderr and the answer to stdout.
@@ -95,13 +97,18 @@ adapter exit.
   10/12; mean model calls 7.5 and 7.92 (min 4, max 13); mean 15.5 s and 14.5 s per question; no tool errors.
   It read pages in 4,000-character parts, often to the end (57 and 59 read_doc calls in 12 runs), as the
   `read_doc` docstring says ("continue with start=next_start while more is true").
-- Prompt "s1" (s1-e03's SYSTEM verbatim: search first for LangGraph/LangChain questions, answer other questions
+- Prompt "s1" (the SYSTEM prompt of series S1 episode 3, `s1-e03`, another series; not S4's previous episode, which
+  was about Claude Code. Copied verbatim: search first for LangGraph/LangChain questions, answer other questions
   directly, 3-5 sentences): searched 3/12 and 3/12 (5 of the 6 were the conditional-edges question); expected page
   path in the answer 0/12 and 0/12, also in the runs that searched; mean model calls 3.5 and 2.58; mean 4.6 s and
   3.8 s. In s1-e03 the same prompt with one local `@tool search_docs` (no read tool) searched 2/24 with
   `create_agent`.
+- Both prompts tell the model to search before answering LangGraph/LangChain questions ("call search_docs first"
+  in s1, "Search the docs with search_docs" in s4). The s1 prompt also says to answer other questions directly
+  without tools and to answer in 3-5 sentences; the s4 prompt adds "read the best page with read_doc".
 - What differs from s1-e03 is the prompt and the tool set (two MCP tools with their docstrings instead of one local
-  tool); these runs do not separate the two. The records do not say why the model skipped the search.
+  tool); these runs do not separate the two, so they do not show which change made the model search. The records do
+  not say why the model skipped the search.
 
 ### Bridge facts (`bridge-check.jsonl.txt`, no model)
 - `list_tools()` returns the 2 tools only. The server also has resource `docs://index`, template
@@ -127,10 +134,13 @@ adapter exit.
 ## Difference from the author's book
 Deep Agents book 2.7 (page 379471) uses the standalone package `langchain-mcp-adapters`. In langchain 1.5.0 MCP is in
 `langchain.mcp` (`langchain[mcp]`); the migration guide marks the old API deprecated.
-- Package: page 379471 installs `uv add langchain-mcp-adapters`; this episode used `uv add "langchain[mcp]"`.
-- Client: page 379471 builds `MultiServerMCPClient({...})` and calls `await client.get_tools()`; now
+- Package: page 379471 says "Deep Agents는 `langchain-mcp-adapters` 패키지로 MCP 서버의 도구를 일반 LangChain 도구로
+  변환해 붙입니다." and installs `uv add langchain-mcp-adapters`; this episode used `uv add "langchain[mcp]"`.
+- Client: page 379471 says "`MultiServerMCPClient`에 서버별 연결 설정을 딕셔너리로 전달합니다." and
+  "`await client.get_tools()`로 모든 서버의 도구를 한 번에 가져옵니다."; now
   `async with MCPAdapter(config) as adapter: tools = await adapter.list_tools()`.
-- Transport key: page 379471 writes `"transport": "stdio"` / `"streamable_http"` / `"sse"` in each entry. The
+- Transport key: page 379471 says "각 서버는 트랜스포트(`stdio` / `streamable_http` / `sse`)에 따라 필드가 다릅니다." and
+  writes `"transport": "stdio"` / `"streamable_http"` in each entry. The
   MCPConfig entry has no transport key; `command` means stdio, `url` means HTTP.
 - One server's tools: page 379471 uses `await client.get_tools(server_name="filesystem")`. `list_tools()` has no
   server argument; the migration guide says to point an adapter at that server. With two entries in one MCPConfig
